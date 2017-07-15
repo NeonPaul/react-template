@@ -1,8 +1,50 @@
-import React from 'react';
-import ReactDOM from 'react-dom';
-import './index.css';
-import App from './App';
-import registerServiceWorker from './registerServiceWorker';
+import React                from 'react'
+import ReactDOM             from 'react-dom'
 
-ReactDOM.render(<App />, document.getElementById('root'));
-registerServiceWorker();
+import Router               from 'universal-router'
+import queryString          from 'query-string'
+
+
+import App                  from './App'
+import history              from './history'
+import routes               from './pages/routes'
+
+const context = {
+  insertCss: (...styles) => {
+    const removeCss = styles.map(x => x._insertCss())
+    return () => { removeCss.forEach(f => f()) }
+  },
+}
+
+const container = document.getElementById('root')
+const router = new Router(routes)
+
+let currentLocation = history.location
+
+async function onLocationChange(location, action) {
+  currentLocation = location
+
+  try {
+    const route = await router.resolve({
+      path: location.pathname,
+      query: queryString.parse(location.search),
+    })
+
+    if (currentLocation.key !== location.key) return
+
+    if (route.redirect) {
+      history.replace(route.redirect)
+      return
+    }
+
+    ReactDOM.render(
+      <App context={ context }>{ route.component }</App>,
+      container
+    )
+  } catch (error) {
+    console.error(error)
+  }
+}
+
+history.listen(onLocationChange)
+onLocationChange(currentLocation)

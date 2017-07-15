@@ -1,20 +1,28 @@
 import React, { Component } from 'react';
+import PropTypes            from 'prop-types'
 import logo from './logo.svg';
-import './App.css';
+import s from './App.css';
+
+import withStyles from 'isomorphic-style-loader/lib/withStyles';
+
+const ContextType = {
+  insertCss: PropTypes.func.isRequired
+}
 
 class App extends Component {
+  static propTypes = {
+    context: PropTypes.shape(ContextType).isRequired,
+    children: PropTypes.element.isRequired
+  }
+
+  static childContextTypes = ContextType
+
+  getChildContext() {
+    return this.props.context
+  }
+
   render() {
-    return (
-      <div className="App">
-        <div className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-          <h2>Welcome to React</h2>
-        </div>
-        <p className="App-intro">
-          To get started, edit <code>src/App.js</code> and save to reload.
-        </p>
-      </div>
-    );
+    return React.Children.only(this.props.children)
   }
 }
 
