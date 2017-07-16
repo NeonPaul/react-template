@@ -17,7 +17,19 @@ const context = {
 }
 
 const container = document.getElementById('root')
-const router = new Router(routes)
+const router = new Router(routes, {
+  resolveRoute: (context, params) => {
+    if (typeof context.route.action !== 'function') {
+      return null;
+    }
+
+    if (!context.route.public) {
+      return routes.login.action(context, params)
+    }
+
+    return context.route.action(context, params);
+  }
+})
 
 let currentLocation = history.location
 
