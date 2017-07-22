@@ -55,6 +55,7 @@ module.exports = {
   devtool: 'source-map',
   // In production, we only want to load the polyfills and the app code.
   entry: [require.resolve('./polyfills'), paths.serverIndexJs],
+  externals: ['hiredis'],
   output: {
     // The build folder.
     path: paths.appBuild,
@@ -220,7 +221,7 @@ module.exports = {
     // In production, it will be an empty string unless you specify "homepage"
     // in `package.json`, in which case it will be the pathname of that URL.
     new InterpolateHtmlPlugin(env.raw),
-    
+
     // Makes some environment variables available to the JS code, for example:
     // if (process.env.NODE_ENV === 'production') { ... }. See `./env.js`.
     // It is absolutely essential that NODE_ENV was set to production here.

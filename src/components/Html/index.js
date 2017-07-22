@@ -19,7 +19,7 @@ class Html extends React.Component {
   }
 
   render() {
-    const { title, description, styles, scripts, children } = this.props
+    const { title, description, styles, scripts, children, user } = this.props
     return (
       <html className="no-js" lang="en">
       <head>
@@ -42,6 +42,9 @@ class Html extends React.Component {
         id="root"
         dangerouslySetInnerHTML={{ __html: children }}
       />
+      { user && <script dangerouslySetInnerHTML={{ __html: `
+                window.user = ${JSON.stringify(user)}
+                ` }} /> }
       { scripts.map(script => <script key={script} src={script} />) }
       </body>
       </html>

@@ -9,23 +9,24 @@ import Router               from 'universal-router'
 
 import App                  from '../App'
 import Html                 from '../components/Html'
-import routes               from '../pages/routes'
+import router               from '../router'
 
 import React                from 'react'
 import ReactDOM             from 'react-dom/server'
+import auth from './auth'
 
 const PORT = 3000
 
 const app = express()
+app.use(cookieParser())
+app.use(bodyParser.urlencoded({ extended: true }))
+auth(app)
 const server = createServer(app)
-
-const router = new Router(routes)
 
 const jsFiles = fs.readdirSync('./build/static/js')
 
 app.use(express.static('./build'))
-app.use(cookieParser())
-app.use(bodyParser.urlencoded({ extended: true }))
+
 app.use(bodyParser.json())
 
 app.get('*', async (req, res, next) => {
@@ -43,6 +44,7 @@ app.get('*', async (req, res, next) => {
     const route = await router.resolve({
       path: req.path,
       query: req.query,
+      user: req.user
     })
 
     if (route.redirect) {
@@ -58,6 +60,7 @@ app.get('*', async (req, res, next) => {
     data.scripts = [
       `/static/js/${ jsFiles[0] }`
     ]
+    data.user = req.user
 
     const html = ReactDOM.renderToStaticMarkup(<Html {...data} />)
     res.status(route.status || 200)

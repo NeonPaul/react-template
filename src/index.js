@@ -1,13 +1,11 @@
 import React                from 'react'
 import ReactDOM             from 'react-dom'
 
-import Router               from 'universal-router'
 import queryString          from 'query-string'
-
 
 import App                  from './App'
 import history              from './history'
-import routes               from './pages/routes'
+import router from './router'
 
 const context = {
   insertCss: (...styles) => {
@@ -17,19 +15,7 @@ const context = {
 }
 
 const container = document.getElementById('root')
-const router = new Router(routes, {
-  resolveRoute: (context, params) => {
-    if (typeof context.route.action !== 'function') {
-      return null;
-    }
 
-    if (!context.route.public) {
-      return routes.login.action(context, params)
-    }
-
-    return context.route.action(context, params);
-  }
-})
 
 let currentLocation = history.location
 
@@ -40,6 +26,7 @@ async function onLocationChange(location, action) {
     const route = await router.resolve({
       path: location.pathname,
       query: queryString.parse(location.search),
+      user: window.user
     })
 
     if (currentLocation.key !== location.key) return
