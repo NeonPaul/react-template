@@ -21,7 +21,6 @@
     "cookie-parser": "^1.4.3",
     "css-loader": "0.28.4",
     "dotenv": "4.0.0",
-    "eslint": "3.19.0",
     "eslint-config-react-app": "^1.0.5",
     "eslint-loader": "1.7.1",
     "eslint-plugin-flowtype": "2.34.0",
@@ -54,6 +53,7 @@
     "url-loader": "0.5.9",
     "webpack": "2.6.1",
     "webpack-dev-server": "2.5.0",
+    "webpack-hot-middleware": "^2.18.2",
     "webpack-manifest-plugin": "1.1.0",
     "whatwg-fetch": "2.0.3"
   },
@@ -103,5 +103,9 @@
   },
   "eslintConfig": {
     "extends": "react-app"
+  },
+  "devDependencies": {
+    "eslint": "^3.19.0",
+    "standard": "^10.0.2"
   }
 }

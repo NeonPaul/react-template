@@ -1,25 +1,24 @@
-import React                from 'react'
-import ReactDOM             from 'react-dom'
+import React from 'react'
+import ReactDOM from 'react-dom'
 
-import queryString          from 'query-string'
+import queryString from 'query-string'
 
-import App                  from './App'
-import history              from './history'
+import App from './App'
+import history from './history'
 import router from './router'
 
 const context = {
   insertCss: (...styles) => {
     const removeCss = styles.map(x => x._insertCss())
     return () => { removeCss.forEach(f => f()) }
-  },
+  }
 }
 
 const container = document.getElementById('root')
 
-
 let currentLocation = history.location
 
-async function onLocationChange(location, action) {
+async function onLocationChange (location, action) {
   currentLocation = location
 
   try {
@@ -37,7 +36,7 @@ async function onLocationChange(location, action) {
     }
 
     ReactDOM.render(
-      <App context={ context }>{ route.component }</App>,
+      <App context={context}>{ route.component }</App>,
       container
     )
   } catch (error) {
