@@ -11,9 +11,12 @@ import auth from './auth'
 
 const PORT = 3000
 
-const serve = (req, res, next) => {
+const router = express.Router()
+
+auth(router)
+
+router.get('*', (req, res, next) => {
   try {
-    console.log('doing my best')
     const App = require('../App').default
     const Html = require('../components/Html').default
     const router = require('../router').default
@@ -55,28 +58,20 @@ const serve = (req, res, next) => {
   } catch (err) {
     next(err)
   }
-}
+})
 
-export default serve
+export default router
 
 if (require.main === module) {
   const app = express()
 
   app.use(cookieParser())
   app.use(bodyParser.urlencoded({ extended: true }))
-  auth(app)
   app.use(bodyParser.json())
-
-  const jsFiles = fs.readdirSync('./build/static/js')
 
   app.use(express.static('./build'))
 
-  app.use((req, res, next) => {
-    req.index = `/static/js/${jsFiles[0]}`
-    next()
-  })
-
-  app.get('*', serve)
+  app.use(router)
 
   app.use((err, req, res, next) => {
     console.log(err)

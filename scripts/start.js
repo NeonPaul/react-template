@@ -60,13 +60,10 @@ choosePort(HOST, DEFAULT_PORT)
     const wdm = webpackDevMiddleware(compiler, {
       publicPath: config.output.publicPath,
       stats: { colors: true },
-      serverSideRender: true,
       hot: true
     })
+
     devServer.use(wdm)
-    devServer.use(require('webpack-hot-middleware')(compiler, {
-      log: console.log, path: '/__webpack_hmr', heartbeat: 10 * 1000
-    }))
 
     serverCompiler.watch({}, (err, stats) => {
       if (err) {
@@ -84,19 +81,17 @@ choosePort(HOST, DEFAULT_PORT)
 
       started = true
 
-      devServer.use('*', (req, res, next) => {
+      devServer.use((req, res, next) => {
         try {
-          console.log('using')
           require(main).default(req, res, next)
         } catch (e) {
           console.log('bad time', e)
           next(e)
         }
       })
-      console.log('is set')
 
       devServer.use((err, req, res, next) => {
-        console.log(err)
+        console.log('Caught error:', err)
       })
 /*
 
@@ -121,7 +116,6 @@ choosePort(HOST, DEFAULT_PORT)
 
       ['SIGINT', 'SIGTERM'].forEach(function (sig) {
         process.on(sig, function () {
-          devServer.close()
           process.exit()
         })
       })
