@@ -1,19 +1,16 @@
 const passport = require('passport')
 const Strategy = require('passport-local').Strategy
+const session = require('express-session')
+const RedisStore = require('connect-redis')(session)
 
 export default app => {
-  const findByUsername = (u, p, cb) => cb(null, {
-    password: p
-  })
-
   passport.use(new Strategy(
   function (username, password, cb) {
-    findByUsername(username, password, function (err, user) {
-      if (err) { return cb(err) }
-      if (!user) { return cb(null, false) }
-      if (user.password !== password) { return cb(null, false) }
-      return cb(null, user)
-    })
+    if (username === process.env.USERNAME && password === process.env.PASSWORD) {
+      return cb(null, username)
+    } else {
+      return cb(null, false)
+    }
   }))
 
 // Configure Passport authenticated session persistence.
@@ -33,9 +30,31 @@ export default app => {
 
 // Use application-level middleware for common functionality, including
 // logging, parsing, and session handling.
+  const sessionConfig = {}
+
+  if (process.env.NODE_ENV === 'production') {
+    const envs = ['SESSION_SECRET', 'REDIS_URL', 'USERNAME', 'PASSWORD']
+
+    const missing = envs.filter(env => !process.env[env])
+
+    if (missing.length) {
+      console.log('Must set ' + missing.join(', ') + ' in process.env.');
+      process.exit(1)
+    }
+
+    sessionConfig.store = new RedisStore({
+      url: process.env.REDIS_URL
+    })
+  }
+
   app.use(require('cookie-parser')())
   app.use(require('body-parser').urlencoded({ extended: true }))
-  app.use(require('express-session')({ secret: 'keyboard cat', resave: false, saveUninitialized: false }))
+  app.use(session({
+    ...sessionConfig,
+    secret: process.env.SESSION_SECRET || 'keyboard cat',
+    resave: false, // Don't re-save if session has not been modified
+    saveUninitialized: false // Don't save session until it has been modified
+  }))
 
 // Initialize Passport and restore authentication state, if any, from the
 // session.
