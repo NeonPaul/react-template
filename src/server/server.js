@@ -1,78 +1,86 @@
-import bodyParser           from 'body-parser'
-import cookieParser         from 'cookie-parser'
-import express              from 'express'
-import { createServer }     from 'http'
+import express from 'express'
+import { createServer } from 'http'
 
-import fs                   from 'fs'
-
-import Router               from 'universal-router'
-
-import App                  from '../App'
-import Html                 from '../components/Html'
-import routes               from '../pages/routes'
-
-import React                from 'react'
-import ReactDOM             from 'react-dom/server'
+import React from 'react'
+import ReactDOM from 'react-dom/server'
+import auth from './auth'
 
 const PORT = 3000
 
-const app = express()
-const server = createServer(app)
+function router () {
+  const router = express.Router()
 
-const router = new Router(routes)
+  auth(router)
 
-const jsFiles = fs.readdirSync('./build/static/js')
+  router.get('*', (req, res, next) => {
+    try {
+      const App = require('../App').default
+      const Html = require('../components/Html').default
+      const router = require('../router').default
 
-app.use(express.static('./build'))
-app.use(cookieParser())
-app.use(bodyParser.urlencoded({ extended: true }))
-app.use(bodyParser.json())
+      const css = new Set()
 
-app.get('*', async (req, res, next) => {
-  try {
-    const css = new Set()
+      const context = {
+        insertCss: (...styles) => {
+          styles.forEach(style => {
+            return css.add(style._getCss())
+          })
+        }
+      }
 
-    const context = {
-      insertCss: (...styles) => {
-        styles.forEach(style => {
-          return css.add(style._getCss())
-        })
-      },
+      router.resolve({
+        path: req.path,
+        query: req.query,
+        user: req.user
+      }).then(route => {
+        if (route.redirect) {
+          res.redirect(route.status || 302, route.redirect)
+          return
+        }
+
+        const data = { ...route }
+        data.children = ReactDOM.renderToString(<App context={context}>{ route.component }</App>)
+        data.styles = [
+          { id: 'css', cssText: [...css].join('') }
+        ]
+        data.scripts = [
+          req.index
+        ]
+        data.user = req.user
+
+        const html = ReactDOM.renderToStaticMarkup(<Html {...data} />)
+        res.status(route.status || 200)
+        res.send(`<!doctype html>${html}`)
+      }).catch(next)
+    } catch (err) {
+      next(err)
     }
+  })
 
-    const route = await router.resolve({
-      path: req.path,
-      query: req.query,
-    })
+  return router;
+}
 
-    if (route.redirect) {
-      res.redirect(route.status || 302, route.redirect)
-      return
-    }
 
-    const data = { ...route }
-    data.children = ReactDOM.renderToString(<App context={ context }>{ route.component }</App>)
-    data.styles = [
-      { id: 'css', cssText: [...css].join('') },
-    ]
-    data.scripts = [
-      `/static/js/${ jsFiles[0] }`
-    ]
+if (require.main === module) {
+  const app = express()
 
-    const html = ReactDOM.renderToStaticMarkup(<Html {...data} />)
-    res.status(route.status || 200)
-    res.send(`<!doctype html>${html}`)
-  } catch (err) {
-    next(err)
-  }
-})
+  // Serve static pages before the auth stuff so we don't
+  // create sessions on requests for assets
+  app.use(express.static('./build'))
 
-app.use((err, req, res, next) => {
-  console.log(err)
-  res.status(err.status || 500)
-  res.send(`Internal server error`)
-})
+  app.use(router())
 
-server.listen(PORT, () => {
-  console.log(`==> 🌎  http://0.0.0.0:${ PORT }/`)
-})
+  app.use((err, req, res, next) => {
+    console.log(err)
+    res.status(err.status || 500)
+    res.send(`Internal server error`)
+  })
+
+  const server = createServer(app)
+
+  server.listen(PORT, () => {
+    console.log(`==> 🌎  http://0.0.0.0:${PORT}/`)
+  })
+}
+
+export default router();

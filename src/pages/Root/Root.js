@@ -1,15 +1,12 @@
-import React                from 'react'
-import go                   from '../../history/go'
+import React from 'react'
 
-import s                    from './root.css'
-import withStyles           from 'isomorphic-style-loader/lib/withStyles'
+import s from './root.css'
+import withStyles from 'isomorphic-style-loader/lib/withStyles'
 
 const Root = ({ title }) => (
-  <div  className='root'>
+  <div className='root'>
     Root page
   </div>
 )
-
-
 
 export default withStyles(s)(Root)

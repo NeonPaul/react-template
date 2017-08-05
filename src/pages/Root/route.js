@@ -1,17 +1,16 @@
-import React                from 'react'
+import React from 'react'
 
-
-import Root                 from './Root'
+import Root from './Root'
 
 const title = `Root`
 
 export default {
   path: '/',
 
-  action() {
+  action () {
     return {
       title,
-      component: <Root title={ title } />,
+      component: <Root title={title} />
     }
-  },
+  }
 }

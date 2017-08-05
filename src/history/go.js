@@ -1,4 +1,4 @@
-import history              from '.'
+import history from '.'
 
 export default (location) => {
   history.push(location)
