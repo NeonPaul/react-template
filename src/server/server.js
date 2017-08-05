@@ -1,9 +1,11 @@
 import express from 'express'
 import { createServer } from 'http'
+import { Provider } from 'react-redux'
 
 import React from 'react'
 import ReactDOM from 'react-dom/server'
 import auth from './auth'
+import store from '../store'
 
 const PORT = 3000
 
@@ -39,12 +41,17 @@ function router () {
         }
 
         const data = { ...route }
-        data.children = ReactDOM.renderToString(<App context={context}>{ route.component }</App>)
+        data.children = ReactDOM.renderToString(
+          <Provider store={store}>
+            <App context={context}>{ route.component }</App>
+          </Provider>
+        )
+
         data.styles = [
           { id: 'css', cssText: [...css].join('') }
         ]
         data.scripts = [
-          req.index
+          global.process.env.CLIENT_MAIN
         ]
         data.user = req.user
 

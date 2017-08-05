@@ -60,7 +60,8 @@ choosePort(HOST, DEFAULT_PORT)
     const wdm = webpackDevMiddleware(compiler, {
       publicPath: config.output.publicPath,
       stats: { colors: true },
-      hot: true
+      hot: true,
+      serverSideRender: true
     })
 
     devServer.use(wdm)
@@ -82,6 +83,8 @@ choosePort(HOST, DEFAULT_PORT)
       started = true
 
       devServer.use((req, res, next) => {
+        process.env.CLIENT_MAIN = res.locals.webpackStats.toJson().assetsByChunkName.main[0]
+
         try {
           require(main).default(req, res, next)
         } catch (e) {

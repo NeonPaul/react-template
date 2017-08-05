@@ -1,11 +1,12 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
-
+import { Provider } from 'react-redux'
 import queryString from 'query-string'
 
 import App from './App'
 import history from './history'
 import router from './router'
+import store from './store'
 
 const context = {
   insertCss: (...styles) => {
@@ -36,7 +37,9 @@ async function onLocationChange (location, action) {
     }
 
     ReactDOM.render(
-      <App context={context}>{ route.component }</App>,
+      <Provider store={store}>
+        <App context={context}>{ route.component }</App>
+      </Provider>,
       container
     )
   } catch (error) {
