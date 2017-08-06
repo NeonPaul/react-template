@@ -64,6 +64,7 @@ export default app => {
   app.post('/login',
   passport.authenticate('local', { failureRedirect: '/' }),
   function (req, res) {
+    req.session.user = req.user
     res.redirect('/')
   })
 }

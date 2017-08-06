@@ -1,4 +1,32 @@
-import { createStore } from 'redux'
+import { createStore, applyMiddleware } from 'redux'
+import thunk from 'redux-thunk'
+import fetchPonyfill from 'fetch-ponyfill'
+
+const { fetch } = fetchPonyfill()
+
+const SET = payload => ({ type: SET, payload })
+
+const url = process.env.BROWSER ? '' : 'http://localhost:3000'
+
+export const increment = (step = 1) => (dispatch) =>
+  fetch(url + '/api', {
+    method: 'POST',
+    body: JSON.stringify({ step }),
+    headers: {
+      'Content-Type': 'application/json'
+    }
+  })
+  .then(response => response.text())
+  .then(payload =>
+    dispatch(SET(payload))
+  )
+
+export const decrement = () => increment(-1)
+
+export const read = () => (dispatch) =>
+  fetch(url + '/api')
+  .then(response => response.text())
+  .then(payload => dispatch(SET(payload)))
 
 /**
  * This is a reducer, a pure function with (state, action) => state signature.
@@ -12,12 +40,10 @@ import { createStore } from 'redux'
  * follows a different convention (such as function maps) if it makes sense for your
  * project.
  */
-function counter(state = 0, action) {
+function counter(state = process.env.BROWSER ? window.initialState : 0, action) {
   switch (action.type) {
-  case 'INCREMENT':
-    return state + 1
-  case 'DECREMENT':
-    return state - 1
+  case SET:
+    return action.payload
   default:
     return state
   }
@@ -25,6 +51,6 @@ function counter(state = 0, action) {
 
 // Create a Redux store holding the state of your app.
 // Its API is { subscribe, dispatch, getState }.
-let store = createStore(counter)
+let store = createStore(counter, applyMiddleware(thunk))
 
 export default store

@@ -11,7 +11,13 @@ const router = new Router(routes, {
       return routes.login.action(context, params)
     }
 
-    return context.route.action(context, params)
+    const route = context.route.action(context, params)
+
+    const actions = [].concat(route.component.actions || [], route.actions || [])
+
+    return Promise.all(actions.map(
+      action => action(context.store.dispatch)
+    )).then(() => route)
   }
 })
 

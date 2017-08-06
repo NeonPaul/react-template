@@ -1,5 +1,6 @@
 import React from 'react'
 import { connect } from 'react-redux';
+import { increment, decrement, read } from '../../store';
 
 import s from './root.css'
 import withStyles from 'isomorphic-style-loader/lib/withStyles'
@@ -16,12 +17,13 @@ const Root = ({ title, counter, inc, dec }) => (
 const mapStateToProps = (state) => ({ counter: state })
 const mapDispatchToProps = (dispatch) => ({
   inc: () => {
-    console.log('inc')
-    dispatch({ type: 'INCREMENT' })
+    dispatch(increment())
   },
-  dec: () => dispatch({ type: 'DECREMENT' })
+  dec: () => dispatch(decrement())
 })
 
-export default connect(mapStateToProps, mapDispatchToProps)(withStyles(s)(Root))
+Root.actions = [
+  dispatch => dispatch(read())
+]
 
-console.log('hello')
+export default connect(mapStateToProps, mapDispatchToProps)(withStyles(s)(Root))

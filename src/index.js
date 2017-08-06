@@ -26,7 +26,8 @@ async function onLocationChange (location, action) {
     const route = await router.resolve({
       path: location.pathname,
       query: queryString.parse(location.search),
-      user: window.user
+      user: window.user,
+      store
     })
 
     if (currentLocation.key !== location.key) return
@@ -36,9 +37,10 @@ async function onLocationChange (location, action) {
       return
     }
 
+    const Route = route.component
     ReactDOM.render(
       <Provider store={store}>
-        <App context={context}>{ route.component }</App>
+        <App context={context}><Route /></App>
       </Provider>,
       container
     )

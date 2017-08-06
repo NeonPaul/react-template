@@ -6,6 +6,7 @@ import React from 'react'
 import ReactDOM from 'react-dom/server'
 import auth from './auth'
 import store from '../store'
+import api from './api'
 
 const PORT = 3000
 
@@ -13,6 +14,8 @@ function router () {
   const router = express.Router()
 
   auth(router)
+
+  router.use('/api', api)
 
   router.get('*', (req, res, next) => {
     try {
@@ -33,7 +36,8 @@ function router () {
       router.resolve({
         path: req.path,
         query: req.query,
-        user: req.user
+        user: req.user,
+        store
       }).then(route => {
         if (route.redirect) {
           res.redirect(route.status || 302, route.redirect)
@@ -41,9 +45,11 @@ function router () {
         }
 
         const data = { ...route }
+        const Route = route.component
+
         data.children = ReactDOM.renderToString(
           <Provider store={store}>
-            <App context={context}>{ route.component }</App>
+            <App context={context}><Route /></App>
           </Provider>
         )
 
@@ -53,12 +59,16 @@ function router () {
         data.scripts = [
           global.process.env.CLIENT_MAIN
         ]
+        data.state = store.getState()
         data.user = req.user
 
         const html = ReactDOM.renderToStaticMarkup(<Html {...data} />)
         res.status(route.status || 200)
         res.send(`<!doctype html>${html}`)
-      }).catch(next)
+      }).catch(err => {
+        console.log(err)
+        next(err)
+      })
     } catch (err) {
       next(err)
     }

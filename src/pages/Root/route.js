@@ -1,5 +1,3 @@
-import React from 'react'
-
 import Root from './Root'
 
 const title = `Root`
@@ -7,10 +5,10 @@ const title = `Root`
 export default {
   path: '/',
 
-  action () {
+  action (...args) {
     return {
       title,
-      component: <Root title={title} />
+      component: Root
     }
   }
 }

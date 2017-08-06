@@ -3,7 +3,7 @@ import React from 'react'
 
 class Html extends React.Component {
   render () {
-    const { title, description, styles, scripts, children, user } = this.props
+    const { title, description, styles, scripts, children, state, user } = this.props
     return (
       <html className='no-js' lang='en'>
         <head>
@@ -26,9 +26,12 @@ class Html extends React.Component {
             id='root'
             dangerouslySetInnerHTML={{ __html: children }}
       />
+          <script dangerouslySetInnerHTML={{ __html: `
+            window.initialState = ${JSON.stringify(state || '')}
+          ` }} />
           { user && <script dangerouslySetInnerHTML={{ __html: `
-                window.user = ${JSON.stringify(user)}
-                ` }} /> }
+            window.user = ${JSON.stringify(user)}
+          ` }} /> }
           { scripts.map(script => <script key={script} src={script} />) }
         </body>
       </html>
