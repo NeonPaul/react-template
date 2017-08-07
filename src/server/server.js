@@ -37,7 +37,9 @@ function router () {
         path: req.path,
         query: req.query,
         user: req.user,
-        store
+        store,
+        method: req.method,
+        body: req.body
       }).then(route => {
         if (route.redirect) {
           res.redirect(route.status || 302, route.redirect)

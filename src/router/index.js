@@ -13,7 +13,9 @@ const router = new Router(routes, {
 
     const route = context.route.action(context, params)
 
-    const actions = [].concat(route.component.actions || [], route.actions || [])
+    const getActions = [].concat(route.component.actions || [], route.actions || []).filter(a => typeof a === 'function')
+    const postActions = ((route.component.actions || {}).post || []).map(a => (...args) => a(context.body, ...args))
+    const actions = context.method === 'POST' ? postActions : getActions
 
     return Promise.all(actions.map(
       action => action(context.store.dispatch)

@@ -19,7 +19,7 @@ const container = document.getElementById('root')
 
 let currentLocation = history.location
 
-async function onLocationChange (location, action) {
+async function onLocationChange (location, action, state) {
   currentLocation = location
 
   try {
@@ -27,7 +27,9 @@ async function onLocationChange (location, action) {
       path: location.pathname,
       query: queryString.parse(location.search),
       user: window.user,
-      store
+      store,
+      method: state.method,
+      body: state.body
     })
 
     if (currentLocation.key !== location.key) return
